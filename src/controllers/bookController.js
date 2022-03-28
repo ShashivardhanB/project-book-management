@@ -152,13 +152,13 @@ const getBookdetails = async function (req, res) {
             return res.status(400).send({ status: false, message: "please provide valid bookId" })
         }
 
-        const bookIdData = await bookModel.findById({ _id: bookId }).select({__v:0}).lean()
-        
+        const bookIdData = await bookModel.findById({ _id: bookId }).select({ __v: 0 }).lean()
+
         if (!bookIdData) {
             return res.status(404).send({ status: false, message: "no documents  found" })
         }
 
-       
+
 
         const reviewData = await reviewModel.find({ $and: [{ bookId: bookId }, { isDeleted: false }] }).select({ isDeleted: 0, __v: 0, createdAt: 0, updatedAt: 0 })
         if (reviewData.length != 0) {
@@ -166,7 +166,7 @@ const getBookdetails = async function (req, res) {
         } else {
             bookIdData["reviewsData"] = []
         }
-       
+
 
         return res.status(200).send({ status: false, message: "book list", data: bookIdData })
 
@@ -197,6 +197,9 @@ const updateBookDetails = async function (req, res) {
         const { title, excerpt, releasedAt, ISBN } = requestBody
         const bookId = req.params.bookId
 
+        let finalFilter = {}
+
+
         if (!isValid(bookId)) {
             return res.status(400).send({ status: false, message: "please provide bookId" })
         }
@@ -208,44 +211,51 @@ const updateBookDetails = async function (req, res) {
             return res.status(400).send({ status: false, message: "please provide input via body" })
         }
 
-        if (!isValid(title)) {
-            return res.status(400).send({ status: false, message: "please provide  title" })
+        if (isValid(title)) {
+
+            const isTitleAlreadyExist = await bookModel.findOne({ $and: [{ title: title }, { isDeleted: false }] })
+
+            if (isTitleAlreadyExist) {
+                return res.status(400).send({ status: false, message: "title already exists" })
+            }
+
+            finalFilter["title"] = title
         }
 
-        if (!isValid(excerpt)) {
-            return res.status(400).send({ status: false, message: "please provide excerpt" })
+        if (isValid(excerpt)) {
+            finalFilter["excerpt"] = excerpt
         }
-        if (!isValid(releasedAt)) {
-            return res.status(400).send({ status: false, message: "please provide releasedAt" })
+        if (isValid(releasedAt)) {
+
+            if (!dateRegex.test(releasedAt)) {
+                return res.status(400).send({ status: false, message: "please provide releasedAt in YYYY-MM-DD format" })
+            }
+            finalFilter["releasedAt"] = releasedAt
+
         }
-        if (!isValid(ISBN)) {
-            return res.status(400).send({ status: false, message: "please provide ISBN" })
-        }
-   
+        if (isValid(ISBN)) {
 
-        if (!dateRegex.test(releasedAt)) {
-            return res.status(400).send({ status: false, message: "please provide releasedAt in YYYY-MM-DD format" })
-        }
+            const isISBNAlreadyExist = await bookModel.findOne({ $and: [{ ISBN: ISBN }, { isDeleted: false }] })
 
+            if (isISBNAlreadyExist) {
+                return res.status(400).send({ status: false, message: "ISBN already exists" })
+            }
 
-
-        const isTitleAlreadyExist = await bookModel.findOne({ $and: [{ title: title }, { isDeleted: false }] })
-
-        if (isTitleAlreadyExist) {
-            return res.status(400).send({ status: false, message: "title already exists" })
-        }
-
-        const isISBNAlreadyExist = await bookModel.findOne({ $and: [{ ISBN: ISBN }, { isDeleted: false }] })
-
-        if (isISBNAlreadyExist) {
-            return res.status(400).send({ status: false, message: "ISBN already exists" })
+            finalFilter["ISBN"] = ISBN
         }
 
 
-        await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } })
 
 
-        const updatedData = await bookModel.findById({ _id: bookId })
+
+
+
+
+
+        const updatedData = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
+
+
+
 
         return res.status(200).send({ status: true, message: "success", data: updatedData })
 

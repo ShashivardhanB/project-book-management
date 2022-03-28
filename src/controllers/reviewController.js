@@ -51,12 +51,13 @@ const createReview = async function (req, res) {
             })
         }
 
-        if (!isValid(reviewedBy)) {
-            return res.status(400).send({
-                status: false,
-                message: "please provide your name"
-            })
-        }
+       if(reviewedBy.trim().length === 0){
+        requestBody["reviewedBy"] = "Guest"
+       }
+
+
+
+      
 
         let isBookIdExist = await bookModel.findById({ _id: bookId })
 
@@ -186,14 +187,26 @@ const updateReview = async function (req, res) {
             return res.status(500).send({ status: false, message: "please provide correct reviewId" })
         }
 
-        let updatedData = await reviewModel.updateMany({ _id: reviewId }, { $set: { review: review, rating: rating, reviewedBy: reviewedBy } })
-        console.log(updatedData)
+        await reviewModel.updateMany({ _id: reviewId },
+            {
+                $set:
+                    { review: review, rating: rating, reviewedBy: reviewedBy }
+            })
+
+        const updatedReview = await reviewModel.findById(reviewId)
+
+
+
+        return res.status(200).send({ status: true, message: "success", data: updatedReview })
+
+
 
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
+// --------------------------------------------------------------------------------------------------------------------------------
 
 
 const deleteReview = async function (req, res) {
@@ -254,6 +267,19 @@ const deleteReview = async function (req, res) {
         return res.status(500).send({ status: false, message: err.message })
     }
 }
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 module.exports = { createReview, updateReview, deleteReview }

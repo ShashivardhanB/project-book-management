@@ -99,6 +99,8 @@ const createLogin = async function(req,res){
        
       }
      const {email,password} = requestBody
+
+
      if(!isValid(email)){
         return  res.status(400).send({ status: false, message: 'please enter email' })
      }
@@ -127,7 +129,7 @@ const createLogin = async function(req,res){
       
          
 
-        res.header("x-auth-token", token);
+        res.header("x-api-key", token);
 
         res.send({ status: true, data: token })
  

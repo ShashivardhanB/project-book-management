@@ -246,13 +246,7 @@ const updateBookDetails = async function (req, res) {
 
 
 
-
-
-
-
-
-
-        const updatedData = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
+        const updatedData = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: finalFilter }, { new: true })
 
 
 
@@ -297,24 +291,17 @@ const deleteBook = async function (req, res) {
             return res.status(400).send({ status: false, message: "book already deleted" })
         }
 
-        const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true } })
+        const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, isDeletedAt: new Date() } })
 
         if (deleteBook) {
             return res.status(200).send({ status: true, message: "book deleted successfully" })
         }
 
-
-
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 
-
 }
-
-
-
-
 
 module.exports = {
     createBook, getBooks, getBookdetails, updateBookDetails, deleteBook

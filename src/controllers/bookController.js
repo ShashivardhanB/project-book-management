@@ -3,9 +3,12 @@ const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
 const mongoose = require('mongoose');
 const reviewModel = require('../models/reviewModel');
+const moment = require('moment')
 
 
-const dateRegex = /^\d{4}\-\d{2}\-\d{2}$/;
+
+
+
 
 
 const isValidRequestBody = function (requestBody) {
@@ -58,8 +61,8 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, message: "please enter valid userId" })
         }
 
-        if (!dateRegex.test(releasedAt)) {
-            return res.status(400).send({ status: false, message: "please provide releasedAt in YYYY-MM-DD format" })
+        if (!moment(releasedAt, "YYYY-MM-DD").isValid()) {
+            return res.status(400).send({ status: false, message: "please provide releasedAt correct date and in YYYY-MM-DD format" })
         }
 
         let isTitleAlreadyExist = await bookModel.findOne({ title })
@@ -73,9 +76,16 @@ const createBook = async function (req, res) {
 
 
         let isUserIdExist = await userModel.findOne({ _id: userId })
+
         if (!isUserIdExist) {
             return res.status(400).send({ status: false, message: 'please enter correct userId' })
         }
+          
+        if(req.userId != isUserIdExist.userId ){
+            return res.status(403).send({status:false,message:" you are not authorised"})
+            
+        }
+
 
         let bookCreation = await bookModel.create(requestBody)
         return res.status(201).send({ status: true, message: "success", data: bookCreation })
@@ -164,7 +174,7 @@ const getBookdetails = async function (req, res) {
         if (reviewData.length != 0) {
             bookIdData["reviewsData"] = reviewData
         } else {
-            bookIdData["reviewsData"] = []
+            bookIdData["reviewsData"] = [] 
         }
 
 
@@ -220,6 +230,7 @@ const updateBookDetails = async function (req, res) {
             }
 
             finalFilter["title"] = title
+            
         }
 
         if (isValid(excerpt)) {
@@ -227,8 +238,8 @@ const updateBookDetails = async function (req, res) {
         }
         if (isValid(releasedAt)) {
 
-            if (!dateRegex.test(releasedAt)) {
-                return res.status(400).send({ status: false, message: "please provide releasedAt in YYYY-MM-DD format" })
+            if (!moment(releasedAt, "YYYY-MM-DD").isValid()) {
+                return res.status(400).send({ status: false, message: "please provide releasedAt correct date and in YYYY-MM-DD format" })
             }
             finalFilter["releasedAt"] = releasedAt
 
@@ -243,8 +254,17 @@ const updateBookDetails = async function (req, res) {
 
             finalFilter["ISBN"] = ISBN
         }
+      
 
+        const isBookIdExist= await bookModel.findById(bookId)
+        if(isBookIdExist){
+            return res.status(400).send({status:false,message:"no book exists"})
+        }
 
+        if(res.userId != isBookIdExist.userId){
+            return res.status(403).send({status:false,message:" you are not authorised"})
+        }
+        
 
         const updatedData = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: finalFilter }, { new: true })
 
@@ -284,6 +304,11 @@ const deleteBook = async function (req, res) {
 
         const isBookIdExist = await bookModel.findById(bookId)
 
+        if(req.userId != isBookIdExist.userId ){
+            return res.status(403).send({status:false,message:" you are not authorised"})
+            
+        }
+
         if (!isBookIdExist) {
             return res.status(404).send({ status: false, message: "please provide correct bookId" })
         }
@@ -291,7 +316,7 @@ const deleteBook = async function (req, res) {
             return res.status(400).send({ status: false, message: "book already deleted" })
         }
 
-        const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, isDeletedAt: new Date() } })
+        const deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, { $set: { isDeleted: true, isDeletedAt: new Date(), new:true } })
 
         if (deleteBook) {
             return res.status(200).send({ status: true, message: "book deleted successfully" })

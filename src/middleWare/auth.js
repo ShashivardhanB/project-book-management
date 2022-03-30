@@ -16,7 +16,7 @@ const auth = async function (req, res, next) {
 
         if (!isTokenValid) {
 
-            return res.status(400).send({ status: false, message: "you are not authenticated to use" })
+            return res.status(401).send({ status: false, message: "you are not authenticated to use" })
         }
 
         req.userId = isTokenValid.userId

@@ -261,9 +261,9 @@ Refer below sample
     "createdAt": "2021-09-17T04:25:07.803Z",
     "updatedAt": "2021-09-17T04:25:07.803Z",
     "reviewsData": [
-      {
         "_id": ObjectId("88abc190ef0288abc190ef88"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
+        bookId: Object
+      {Id("88abc190ef0288abc190ef55"),
         reviewedBy: "Jane Doe",
         reviewedAt: "2021-09-17T04:25:07.803Z",
         rating: 4,

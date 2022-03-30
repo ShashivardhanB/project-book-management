@@ -28,16 +28,19 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, message: 'Invalid request parameters. Please provide user detalls' })
             return
           }
-        const { title, name, phone, email, password, address } = requestBody
+        const { title, name, phone, email, password } = requestBody
         if (!isValid(title)) {
             return res.status(400).send({ status: false, msgsage: "please enter title" });
         }
+
         if (isValidTitle(title)) {
             return res.status(400).send({ status: false, msgsage: "please enter valid title" });
         }
+
         if (!isValid(name)) {
             res.status(400).send({ status: false, message: "please enter name" })
         }
+
         if (!isValid(phone)) {
             return res.status(400).send({ status: false, message: "please enter phone number" })
         }
@@ -48,6 +51,7 @@ const createUser = async function (req, res) {
         if (!isValid(password)) {
             return res.status(400).send({ status: false, message: "please enter password" })
         }
+
         const mobileRegex = /^([0-9]){10}$/;
         if (!mobileRegex.test(phone.trim())) {
             return res.status(400).send({
@@ -67,7 +71,7 @@ const createUser = async function (req, res) {
         }
        
         
-        let isEmailAlreadyUsed = await userModel.findOne({ email:email})
+        let isEmailAlreadyUsed = await userModel.findOne({ email})
         if(isEmailAlreadyUsed){
             return res.status(400).send({status:false,message:"EMAIL is already used"})
         }
@@ -105,7 +109,7 @@ const createLogin = async function(req,res){
         return  res.status(400).send({ status: false, message: 'please enter email' })
      }
      if(!isValid(password)){
-        return  res.status(400).send({ status: false, message: 'please enter email' })
+        return  res.status(400).send({ status: false, message: 'please enter password' })
      }
 
       //using regex we will verify the email is valid or not
@@ -116,16 +120,16 @@ const createLogin = async function(req,res){
 
      let isUserExists= await userModel.findOne({ email,password})
         if(!isUserExists){
-            return res.status(400).send({status:false,ERROR:"please provide correct email"})
+            return res.status(400).send({status:false,ERROR:"please provide correct email and password"})
         }
 
         
         let token =jwt.sign({
             userId : isUserExists._id,
             iat : Math.floor(Date.now() / 1000),
-            exp : Math.floor(Date.now() / 1000) + 10*60*30
+            // exp : Math.floor(Date.now() / 1000) + 10*60*30
 
-        },"projectBookManagement")
+        },"projectBookManagement",{expiresIn:"60m"})
       
          
 

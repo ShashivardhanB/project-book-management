@@ -17,6 +17,7 @@ const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
 }
 
+
 const createReview = async function (req, res) {
     try {
 
@@ -37,15 +38,6 @@ const createReview = async function (req, res) {
 
         if (!isValid(rating)) return res.status(400).send({ status: false, message: "please provide rating" })
 
-        if (requestBody.hasOwnProperty(reviewedBy) || requestBody.reviewedBy == null ) {
-
-
-            requestBody["reviewedBy"] = "Gues"
-
-
-        }
-
-
         let isBookIdExist = await bookModel.findById({ _id: bookId })
 
         if (!isBookIdExist) {
@@ -55,6 +47,7 @@ const createReview = async function (req, res) {
         }
 
         if (isBookIdExist.isDeleted === false) {
+
             requestBody["reviewedAt"] = new Date();
 
         } else {
@@ -66,12 +59,12 @@ const createReview = async function (req, res) {
 
 
         let reviewData = await reviewModel.create(requestBody)
+        
 
         if (reviewData) {
             await bookModel.findOneAndUpdate({ _id: bookId }, { $inc: { reviews: 1 } })
 
         }
-
 
         res.status(201).send({
             status: true, data: {
@@ -106,8 +99,7 @@ const updateReview = async function (req, res) {
         let requestParams = req.params
         const { bookId, reviewId } = requestParams
 
-        const finalFilter = {}
-
+        const finalFilter = { }
 
         if (!isValid(bookId)) {
             return res.status(400).send({
@@ -149,17 +141,22 @@ const updateReview = async function (req, res) {
 
         let isReviewIdExist = await reviewModel.findOne({ $and: [{ _id: reviewId }, { isDeleted: false }] })
         if (isReviewIdExist) {
+
             if (isReviewIdExist.bookId == bookId) {
                 let isBookIdExist = await bookModel.findOne({ $and: [{ _id: bookId }, { isDeleted: false }] })
                 if (!isBookIdExist) {
-                    return res.status(400).send({ status: false, message: "please provide correct bookId" })
+                    return res.status(400).send({ status: false, message: "book deleted" })
                 }
             } else {
                 return res.status(400).send({ status: false, message: "please provide correct reviewId and bookId that is related" })
             }
         } else {
-            return res.status(500).send({ status: false, message: "please provide correct reviewId" })
+            return res.status(400).send({ status: false, message: "please provide correct reviewId" })
         }
+
+
+        
+
 
         await reviewModel.updateMany({ _id: reviewId },
             {
@@ -241,7 +238,7 @@ const deleteReview = async function (req, res) {
         }
 
 
-        return res.status(400).send({ status: true, message: "blog successfully deleted" })
+        return res.status(400).send({ status: true, message: "review  successfully deleted" })
 
 
     } catch (err) {

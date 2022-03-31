@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const routes = require('../src/routes/route');
+const route = require('../src/routes/route');
 const  mongoose  = require('mongoose');
 const app = express();
 
@@ -17,7 +17,7 @@ mongoose.connect("mongodb+srv://sumandev:aBosU15RXTGZYkKq@cluster0.4du2i.mongodb
 
 
 
-app.use('/', routes);
+app.use('/', route);
 
 
 app.listen(process.env.PORT || 3000, function () {

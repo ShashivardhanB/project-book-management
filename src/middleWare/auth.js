@@ -1,48 +1,34 @@
-const jwt = require('jsonwebtoken')
+const jwt =require("jsonwebtoken")
 
 
-
-const auth = async function (req, res, next) {
-
-    try {
-
-        const token = req.headers["x-api-key"]
-        if (!token) {
-            return res.status(400).send({ status: false, message: "token must present" })
-        }
-
-
-        const isTokenValid = jwt.verify(token, "projectBookManagement")
-
-        if (!isTokenValid) {
-
-            return res.status(401).send({ status: false, message: "you are not authenticated to use" })
-        }
-
-        req.userId = isTokenValid.userId
-
-    next()
-
-
-    } catch (err) {
-        return res.status(500).send({ status: false, message: err.message })
+const auth=async function (req,res,next){
+    try{
+    let token=req.headers["x-api-key"]
+    if(!token){
+        return res.status(400).send({status:false,msg:"token is required"})
+    }
+    let decodetoken=jwt.verify(token,"project3-group37-booksmanagement")
+    if(!decodetoken){
+        return res.status(400).send({status:false,msg:"please enter the right token"})
     }
 
+      req.userId=decodetoken.userId
 
+     next()
+    
+    }
+   catch(error){
+       return res.status(500).send({status:false,msg:error.message})
 
-    module.exports = {auth}
-
-
-
-
-
-
-
-
-
-
-
-
+   }
 
 }
+
+
+
+
+
+
+
+module.exports = {auth}
 

@@ -14,8 +14,8 @@ router.post("/login",userController.createLogin)
 
 //book API  ==>  createBook, getBooksByQueryParams , getBookDetailsByParams,updateBookDetails &deleteBook
 router.post("/books", middleWare.auth ,bookController.createBook)
-router.get("/books",bookController.getBooks)
-router.get("/books/:bookId",bookController.getBookDetails)
+router.get("/books",middleWare.auth,bookController.getBooks)
+router.get("/books/:bookId",middleWare.auth,bookController.getBookDetails)
 router.put("/books/:bookId",middleWare.auth,bookController.updateBookDetails)
 router.delete("/books/:bookId",middleWare.auth,bookController.deleteBook)
 

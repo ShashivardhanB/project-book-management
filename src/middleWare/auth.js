@@ -7,9 +7,9 @@ const auth=async function (req,res,next){
     if(!token){
         return res.status(400).send({status:false,msg:"token is required"})
     }
-    let decodetoken=jwt.verify(token,"project3-group37-booksmanagement")
+    let decodetoken=jwt.verify(token,"projectBookManagement")
     if(!decodetoken){
-        return res.status(400).send({status:false,msg:"please enter the right token"})
+        return res.status(401).send({status:false,msg:"please enter the right token"})
     }
 
       req.userId=decodetoken.userId

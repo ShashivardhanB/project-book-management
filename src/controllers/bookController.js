@@ -1,6 +1,7 @@
 
 const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
+
 const reviewModel = require('../models/reviewModel');
 const validator = require("../validators/validator")
 const moment = require('moment')
@@ -209,6 +210,7 @@ const updateBookDetails = async function (req, res) {
             finalFilter["releasedAt"] = releasedAt
         }
         if (validator.isValid(ISBN)) {
+            
             if (isNaN(ISBN)) {
                 return res.status(400).send({ status: false, message: "ISBN must  be in Numbers " })
             }
@@ -227,7 +229,7 @@ const updateBookDetails = async function (req, res) {
             return res.status(404).send({ status: false, message: "no book exists" })
         }
 
-        if (res.userId != isBookIdExist.userId) {
+        if (req.userId != isBookIdExist.userId) {
             return res.status(403).send({ status: false, message: " you are not authorised" })
         }
 

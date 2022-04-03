@@ -116,6 +116,8 @@ const updateReview = async function (req, res) {
         }
         if (validator.isValid(rating)) {
 
+            if (rating < 1 || rating > 5) return res.status(400).send({ status: false, message: "please provide rating in between 1 to 5" })
+
             if (isNaN(rating)) {
                 return res.status(400).send({ status: false, message: "rating must  be in Numbers " })
             }
@@ -154,7 +156,7 @@ const updateReview = async function (req, res) {
             finalFilter["reviewedAt"] = new Date();
         }
 
-        const updatedReview = await reviewModel.findByIdAndUpdate({ _id: reviewId }, finalFilter, { new: true })
+        const updatedReview = await reviewModel.findOneAndUpdate({ _id: reviewId }, finalFilter, { new: true })
 
         return res.status(200).send({ status: true, message: "success", data: updatedReview })
 
@@ -201,7 +203,6 @@ const deleteReview = async function (req, res) {
             if (isReviewIdExist.isDeleted === true) {
                 return res.status(404).send({ status: false, message: "review already deleted" })
             }
-
             if (isReviewIdExist.bookId == bookId) {
                 let isBookIdExist = await bookModel.findOne({ $and: [{ _id: bookId }, { isDeleted: false }] })
                 if (!isBookIdExist) {

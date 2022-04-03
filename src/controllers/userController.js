@@ -45,7 +45,7 @@ const createUser = async function (req, res) {
 
         // using regex we will verify the phone  Number is valid or not
 
-        if (!/^([0-9]){10}$/.test(phone.trim())) {
+        if (!(!isNaN(phone))   &&  /^([0-9]){10}$/.test(phone.trim())) {
             return res.status(400).send({
                 status: false, message: " PHONE NUMBER is not a valid mobile number",
             });
